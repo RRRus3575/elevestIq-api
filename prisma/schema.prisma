@@ -67,17 +67,26 @@ enum AgreementStatus {
 }
 
 model Signature {
-  id           String   @id @default(uuid())
-  userId       String
-  agreementId  String
-  signedAt     DateTime @default(now())
-  signatureHash: String?
-  signedDocumentUrl: String?
-  isVerified: Boolean @default(false)
+  id                 String          @id @default(uuid())
+  userId             String
+  agreementId        String
+  signedAt           DateTime        @default(now())
+  signatureHash      String?
+  signedDocumentUrl  String?
+  isVerified         Boolean         @default(false)
+  method             SignatureMethod @default(CLICK)
 
-  user         User     @relation(fields: [userId], references: [id])
-  agreement    Agreement @relation(fields: [agreementId], references: [id])
+  user               User            @relation(fields: [userId], references: [id])
+  agreement          Agreement       @relation(fields: [agreementId], references: [id])
 }
+
+enum SignatureMethod {
+  CLICK
+  DRAW
+  BANK_ID
+  DOCUMENT_UPLOAD
+}
+
 
 model Message {
   id         String   @id @default(uuid())
