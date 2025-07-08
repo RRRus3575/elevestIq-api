@@ -1,15 +1,101 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
-
 generator client {
   provider = "prisma-client-js"
-  output   = "../generated/prisma"
 }
 
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
+}
+
+model User {
+  id        String    @id @default(uuid())
+  email     String    @unique
+  password  String
+  name      String?
+  role      Role
+  profile   Profile?
+  messages  Message[] @relation("Sender")
+  agreements Agreement[]
+  signatures Signature[]
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+}
+
+enum Role {
+  STARTUP
+  INVESTOR
+}
+
+model Profile {
+  id          String   @id @default(uuid())
+  userId      String   @unique
+  description String?
+  goals       String?
+  tags        String[] // Наприклад: ["AI", "Fintech"]
+  location    String?
+
+  user        User     @relation(fields: [userId], references: [id])
+}
+
+model AgreementTemplate {
+  id          String   @id @default(uuid())
+  name        String
+  description String?
+  content     String   // Markdown або HTML шаблон
+
+  createdAt   DateTime @default(now())
+}
+
+model Agreement {
+  id            String   @id @default(uuid())
+  userId        String
+  templateId    String
+  filledData    Json
+  status        AgreementStatus
+
+  user          User     @relation(fields: [userId], references: [id])
+  template      AgreementTemplate @relation(fields: [templateId], references: [id])
+  signatures    Signature[]
+
+  createdAt     DateTime @default(now())
+}
+
+enum AgreementStatus {
+  DRAFT
+  SIGNED
+}
+
+model Signature {
+  id           String   @id @default(uuid())
+  userId       String
+  agreementId  String
+  signedAt     DateTime @default(now())
+  signatureHash: String?
+  signedDocumentUrl: String?
+  isVerified: Boolean @default(false)
+
+  user         User     @relation(fields: [userId], references: [id])
+  agreement    Agreement @relation(fields: [agreementId], references: [id])
+}
+
+model Message {
+  id         String   @id @default(uuid())
+  senderId   String
+  receiverId String
+  content    String
+  timestamp  DateTime @default(now())
+  type       MessageType  @default(TEXT)
+  isRead     Boolean      @default(false)
+
+  sender     User     @relation("Sender", fields: [senderId], references: [id])
+  receiver   User     @relation("Receiver", fields: [receiverId], references: [id])
+}
+
+enum MessageType {
+  TEXT
+  IMAGE
+  FILE
+  LINK
+  VIDEO
 }

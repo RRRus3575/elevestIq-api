@@ -2,7 +2,7 @@ import express from 'express';
 
 const app = express();
 
-// app.use("/api/auth", authRouter)
+app.use("/api/auth", authRouter)
 app.use("/api/", );
 
 app.use((_, res) => {
