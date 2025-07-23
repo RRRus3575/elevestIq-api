@@ -8,19 +8,23 @@ datasource db {
 }
 
 model User {
-  id        String    @id @default(uuid())
-  email     String    @unique
+  id        String           @id @default(uuid())
+  email     String           @unique
   password  String
   token     String?
   name      String?
   role      Role
-  profile   Profile?
-  messages  Message[] @relation("Sender")
+  isOnboarded Boolean        @default(false)
+
+  startupProfile  StartupProfile?
+  investorProfile InvestorProfile?
+
+  messages   Message[]       @relation("Sender")
   agreements Agreement[]
   signatures Signature[]
 
-  createdAt DateTime  @default(now())
-  updatedAt DateTime  @updatedAt
+  createdAt  DateTime        @default(now())
+  updatedAt  DateTime        @updatedAt
 }
 
 enum Role {
@@ -28,16 +32,35 @@ enum Role {
   INVESTOR
 }
 
-model Profile {
+model StartupProfile {
   id          String   @id @default(uuid())
   userId      String   @unique
+  companyName String?
   description String?
   goals       String?
-  tags        String[] // Наприклад: ["AI", "Fintech"]
+  tags        String[] // Напр.: ["AI", "SaaS"]
+  industry    String?
+  stage       String?  
   location    String?
 
   user        User     @relation(fields: [userId], references: [id])
 }
+
+model InvestorProfile {
+  id           String   @id @default(uuid())
+  userId       String   @unique
+  companyName  String?
+  description  String?
+  interests    String?
+  tags         String[] 
+  region       String?
+  budgetMin    Int?
+  budgetMax    Int?
+
+  user         User     @relation(fields: [userId], references: [id])
+}
+
+
 
 model AgreementTemplate {
   id          String   @id @default(uuid())
@@ -55,6 +78,8 @@ model Agreement {
   filledData    Json
   status        AgreementStatus
 
+  pdfUrl String?
+
   user          User     @relation(fields: [userId], references: [id])
   template      AgreementTemplate @relation(fields: [templateId], references: [id])
   signatures    Signature[]
@@ -64,8 +89,11 @@ model Agreement {
 
 enum AgreementStatus {
   DRAFT
+  SENT
   SIGNED
+  REJECTED
 }
+
 
 model Signature {
   id                 String          @id @default(uuid())
@@ -109,3 +137,15 @@ enum MessageType {
   LINK
   VIDEO
 }
+
+model SignatureLog {
+  id           String   @id @default(uuid())
+  signatureId  String
+  timestamp    DateTime @default(now())
+  action       String
+  ipAddress    String?
+  userAgent    String?
+
+  signature    Signature @relation(fields: [signatureId], references: [id])
+}
+
