@@ -8,23 +8,24 @@ datasource db {
 }
 
 model User {
-  id        String           @id @default(uuid())
-  email     String           @unique
-  password  String
-  token     String?
-  name      String?
-  role      Role
-  isOnboarded Boolean        @default(false)
+  id          String  @id @default(uuid())
+  email       String  @unique
+  password    String
+  token       String?
+  name        String?
+  role        Role
+  isOnboarded Boolean @default(false)
 
   startupProfile  StartupProfile?
   investorProfile InvestorProfile?
 
-  messages   Message[]       @relation("Sender")
-  agreements Agreement[]
-  signatures Signature[]
+  messages         Message[]   @relation("Sender")
+  agreements       Agreement[]
+  signatures       Signature[]
+  receivedMessages Message[]   @relation("Receiver")
 
-  createdAt  DateTime        @default(now())
-  updatedAt  DateTime        @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 enum Role {
@@ -40,51 +41,51 @@ model StartupProfile {
   goals       String?
   tags        String[] // Напр.: ["AI", "SaaS"]
   industry    String?
-  stage       String?  
+  stage       String?
   location    String?
 
-  user        User     @relation(fields: [userId], references: [id])
+  user User @relation(fields: [userId], references: [id])
 }
 
 model InvestorProfile {
-  id           String   @id @default(uuid())
-  userId       String   @unique
-  companyName  String?
-  description  String?
-  interests    String?
-  tags         String[] 
-  region       String?
-  budgetMin    Int?
-  budgetMax    Int?
+  id          String   @id @default(uuid())
+  userId      String   @unique
+  companyName String?
+  description String?
+  interests   String?
+  tags        String[]
+  region      String?
+  budgetMin   Int?
+  budgetMax   Int?
 
-  user         User     @relation(fields: [userId], references: [id])
+  user User @relation(fields: [userId], references: [id])
 }
 
-
-
 model AgreementTemplate {
-  id          String   @id @default(uuid())
+  id          String  @id @default(uuid())
   name        String
   description String?
-  content     String   // Markdown або HTML шаблон
+  content     String // Markdown або HTML шаблон
 
-  createdAt   DateTime @default(now())
+  createdAt DateTime @default(now())
+
+  agreements Agreement[]
 }
 
 model Agreement {
-  id            String   @id @default(uuid())
-  userId        String
-  templateId    String
-  filledData    Json
-  status        AgreementStatus
+  id         String          @id @default(uuid())
+  userId     String
+  templateId String
+  filledData Json
+  status     AgreementStatus
 
   pdfUrl String?
 
-  user          User     @relation(fields: [userId], references: [id])
-  template      AgreementTemplate @relation(fields: [templateId], references: [id])
-  signatures    Signature[]
+  user       User              @relation(fields: [userId], references: [id])
+  template   AgreementTemplate @relation(fields: [templateId], references: [id])
+  signatures Signature[]
 
-  createdAt     DateTime @default(now())
+  createdAt DateTime @default(now())
 }
 
 enum AgreementStatus {
@@ -94,19 +95,19 @@ enum AgreementStatus {
   REJECTED
 }
 
-
 model Signature {
-  id                 String          @id @default(uuid())
-  userId             String
-  agreementId        String
-  signedAt           DateTime        @default(now())
-  signatureHash      String?
-  signedDocumentUrl  String?
-  isVerified         Boolean         @default(false)
-  method             SignatureMethod @default(CLICK)
+  id                String          @id @default(uuid())
+  userId            String
+  agreementId       String
+  signedAt          DateTime        @default(now())
+  signatureHash     String?
+  signedDocumentUrl String?
+  signatureLog      SignatureLog?
+  isVerified        Boolean         @default(false)
+  method            SignatureMethod @default(CLICK)
 
-  user               User            @relation(fields: [userId], references: [id])
-  agreement          Agreement       @relation(fields: [agreementId], references: [id])
+  user      User      @relation(fields: [userId], references: [id])
+  agreement Agreement @relation(fields: [agreementId], references: [id])
 }
 
 enum SignatureMethod {
@@ -116,18 +117,17 @@ enum SignatureMethod {
   DOCUMENT_UPLOAD
 }
 
-
 model Message {
-  id         String   @id @default(uuid())
+  id         String      @id @default(uuid())
   senderId   String
   receiverId String
   content    String
-  timestamp  DateTime @default(now())
-  type       MessageType  @default(TEXT)
-  isRead     Boolean      @default(false)
+  timestamp  DateTime    @default(now())
+  type       MessageType @default(TEXT)
+  isRead     Boolean     @default(false)
 
-  sender     User     @relation("Sender", fields: [senderId], references: [id])
-  receiver   User     @relation("Receiver", fields: [receiverId], references: [id])
+  sender   User @relation("Sender", fields: [senderId], references: [id])
+  receiver User @relation("Receiver", fields: [receiverId], references: [id])
 }
 
 enum MessageType {
@@ -139,13 +139,12 @@ enum MessageType {
 }
 
 model SignatureLog {
-  id           String   @id @default(uuid())
-  signatureId  String
-  timestamp    DateTime @default(now())
-  action       String
-  ipAddress    String?
-  userAgent    String?
+  id          String   @id @default(uuid())
+  signatureId String   @unique
+  timestamp   DateTime @default(now())
+  action      String
+  ipAddress   String?
+  userAgent   String?
 
-  signature    Signature @relation(fields: [signatureId], references: [id])
+  signature Signature @relation(fields: [signatureId], references: [id])
 }
-
