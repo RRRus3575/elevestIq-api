@@ -44,6 +44,10 @@ export const loginUser = async(data) => {
         throw HttpError(401, "Email or password is wrong");
     }
 
+    if (!user.isVerified) {
+        throw HttpError(403,'Confirm your email to sign in');
+    }
+
     const payload = {
         id: user.id,
         email: user.email,
@@ -100,4 +104,14 @@ export const updateData = async(id, data) => {
     return prisma.user.findUnique({ where: { id } }); 
 };
 
+
+export const verifyEmailService = async(token) =>{
+    const user = await prisma.user.findFirst({ where: { verificationToken: token } });
+    if (!user) throw HttpError(400,'Invalid token');
+
+    return await prisma.user.update({
+        where: { id: user.id },
+        data: { isVerified: true, verificationToken: null }
+    });
+}
 
