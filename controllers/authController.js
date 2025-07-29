@@ -4,12 +4,15 @@ import { registerUser, loginUser, logoutUser, updateData } from "../services/aut
 
 
 const registerController = async(req, res, next) =>{
+    const data = await req.body
     const newUser = await registerUser({...req.body});
 
 
     res.status(201).json({
         email: newUser.email,
         name: newUser.name,
+        role: newUser.role,
+        isOnboarded: newUser.isOnboarded
     })
 }
 
@@ -21,6 +24,8 @@ const loginController = async(req, res, next) =>{
         user: {
             email: payload.email,
             name: payload.name,
+            role: payload.role,
+            isOnboarded: payload.isOnboarded
         }
     })
 }
@@ -32,11 +37,12 @@ const logoutController = async(req, res) => {
 }
 
 const getCurrentController = (req, res)=>{
-    const {email, name} = req.user
-    console.log(req.user)
+    const {email, name, role, isOnboarded} = req.user
     res.json({
         email,
         name,
+        role,
+        isOnboarded
     })
 }
 
