@@ -48,7 +48,8 @@ export const loginUser = async(data) => {
         id: user.id,
         email: user.email,
         name: user.name,
-        role: user.role
+        role: user.role,
+        isOnboarded: user.isOnboarded
     };
 
     const token = generateToken(payload);

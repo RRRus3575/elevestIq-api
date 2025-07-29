@@ -11,7 +11,8 @@ const registerController = async(req, res, next) =>{
     res.status(201).json({
         email: newUser.email,
         name: newUser.name,
-        role: newUser.role
+        role: newUser.role,
+        isOnboarded: newUser.isOnboarded
     })
 }
 
@@ -23,7 +24,8 @@ const loginController = async(req, res, next) =>{
         user: {
             email: payload.email,
             name: payload.name,
-            role: payload.role
+            role: payload.role,
+            isOnboarded: payload.isOnboarded
         }
     })
 }
@@ -35,11 +37,12 @@ const logoutController = async(req, res) => {
 }
 
 const getCurrentController = (req, res)=>{
-    const {email, name, role} = req.user
+    const {email, name, role, isOnboarded} = req.user
     res.json({
         email,
         name,
-        role
+        role,
+        isOnboarded
     })
 }
 
