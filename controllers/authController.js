@@ -51,8 +51,9 @@ const verifyEmail = async(req, res) => {
     const { token } = req.params;
 
     const result = await verifyEmailService(token)
-
-    res.json({message: 'Email successfully confirmed!'})
+    if(result.isVerified){
+        res.json({message: 'Email successfully confirmed!'})
+    }
 }
 
 export default {

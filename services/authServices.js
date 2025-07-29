@@ -1,6 +1,8 @@
 import HttpError from "../helpers/HttpError.js";
+import crypto from 'crypto';
 import bcrypt from "bcrypt";
 import { generateToken } from "../helpers/jwt.js";
+import { sendVerificationEmail } from '../helpers/sendVerificationEmail.js';
 import { PrismaClient } from "@prisma/client";
 const prisma = new PrismaClient();
 
@@ -17,14 +19,22 @@ export const registerUser = async(data) => {
         throw HttpError(409, "Email in use");
     }
 
+    const verificationToken = crypto.randomBytes(32).toString('hex');
+
+
     const hashPassword = await bcrypt.hash(password, 10);
 
-    return prisma.user.create({
+    const newUser = await prisma.user.create({
         data: {
         ...data,
+        verificationToken,
         password: hashPassword
         }
     });
+
+    await sendVerificationEmail(newUser.email, newUser.name, verificationToken);
+
+    return newUser;
 };
 
 
@@ -42,10 +52,6 @@ export const loginUser = async(data) => {
     const passwordCompare = await bcrypt.compare(password, user.password);
     if (!passwordCompare) {
         throw HttpError(401, "Email or password is wrong");
-    }
-
-    if (!user.isVerified) {
-        throw HttpError(403,'Confirm your email to sign in');
     }
 
     const payload = {
