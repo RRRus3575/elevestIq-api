@@ -4,6 +4,7 @@ import { authRegisterSchema, authLoginSchema } from "../schemas/authSchemas.js";
 import authController from "../controllers/authController.js";
 import auth from "../middlewares/auth.js";
 
+const { registerController, loginController, getCurrentController, logoutController} = authController
 
 
 const authRouter = express.Router();
