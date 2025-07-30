@@ -121,3 +121,25 @@ export const verifyEmailService = async(token) =>{
     });
 }
 
+
+export const resendVerificationService = async(email) => {
+  const user = await prisma.user.findUnique({ where: { email } });
+
+  if (!user) {
+    throw HttpError(404, "User not found");
+  }
+  if (user.isVerified) {
+    throw HttpError(400, "Email already verified");
+  }
+
+  const verificationToken = crypto.randomBytes(32).toString('hex');
+
+  await prisma.user.update({
+    where: { email },
+    data: { verificationToken }
+  });
+
+  await sendVerificationEmail(user.email, user.name, verificationToken);
+
+  return { message: "Verification email resent successfully" }
+}
