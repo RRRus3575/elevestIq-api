@@ -1,6 +1,8 @@
 import HttpError from "../helpers/HttpError.js";
+import crypto from 'crypto';
 import bcrypt from "bcrypt";
 import { generateToken } from "../helpers/jwt.js";
+import { sendVerificationEmail } from '../helpers/sendVerificationEmail.js';
 import { PrismaClient } from "@prisma/client";
 const prisma = new PrismaClient();
 
@@ -17,14 +19,22 @@ export const registerUser = async(data) => {
         throw HttpError(409, "Email in use");
     }
 
+    const verificationToken = crypto.randomBytes(32).toString('hex');
+
+
     const hashPassword = await bcrypt.hash(password, 10);
 
-    return prisma.user.create({
+    const newUser = await prisma.user.create({
         data: {
         ...data,
+        verificationToken,
         password: hashPassword
         }
     });
+
+    await sendVerificationEmail(newUser.email, newUser.name, verificationToken);
+
+    return newUser;
 };
 
 
@@ -101,3 +111,35 @@ export const updateData = async(id, data) => {
 };
 
 
+export const verifyEmailService = async(token) =>{
+    const user = await prisma.user.findFirst({ where: { verificationToken: token } });
+    if (!user) throw HttpError(400,'Invalid token');
+
+    return await prisma.user.update({
+        where: { id: user.id },
+        data: { isVerified: true, verificationToken: null }
+    });
+}
+
+
+export const resendVerificationService = async(email) => {
+  const user = await prisma.user.findUnique({ where: { email } });
+
+  if (!user) {
+    throw HttpError(404, "User not found");
+  }
+  if (user.isVerified) {
+    throw HttpError(400, "Email already verified");
+  }
+
+  const verificationToken = crypto.randomBytes(32).toString('hex');
+
+  await prisma.user.update({
+    where: { email },
+    data: { verificationToken }
+  });
+
+  await sendVerificationEmail(user.email, user.name, verificationToken);
+
+  return { message: "Verification email resent successfully" }
+}

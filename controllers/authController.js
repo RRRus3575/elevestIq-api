@@ -1,6 +1,6 @@
 import HttpError from "../helpers/HttpError.js";
 import controllerWrapper from "./controllerWrapper.js";
-import { registerUser, loginUser, logoutUser, updateData } from "../services/authServices.js";
+import { registerUser, loginUser, logoutUser, updateData, verifyEmailService, resendVerificationService} from "../services/authServices.js";
 
 
 const registerController = async(req, res, next) =>{
@@ -46,9 +46,31 @@ const getCurrentController = (req, res)=>{
     })
 }
 
+
+const verifyEmail = async(req, res) => {
+    const { token } = req.params;
+
+    const result = await verifyEmailService(token)
+    if(result.isVerified){
+        res.json({message: 'Email successfully confirmed!'})
+    }
+}
+
+
+const resendVerification = async(req, res) =>{
+    const {email} = req.body;
+
+    const result = await resendVerificationService(email)
+
+    res.json(result)
+
+}
+
 export default {
     registerController: controllerWrapper(registerController),
     loginController: controllerWrapper(loginController),
     getCurrentController: controllerWrapper(getCurrentController),
     logoutController: controllerWrapper(logoutController),
+    verifyEmail: controllerWrapper(verifyEmail),
+    resendVerification: controllerWrapper(resendVerification)
 }
