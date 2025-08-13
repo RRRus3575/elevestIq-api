@@ -11,12 +11,14 @@ model User {
   id          String  @id @default(uuid())
   email       String  @unique
   password    String
-  token       String?
   name        String?
   role        Role
   isOnboarded Boolean @default(false)
-  isVerified   Boolean  @default(false)
-  verificationToken String? 
+  isVerified  Boolean @default(false)
+
+  tokenVersion Int         @default(0)
+  tokens       UserToken[]
+  sessions     Session[]
 
   startupProfile  StartupProfile?
   investorProfile InvestorProfile?
@@ -33,6 +35,46 @@ model User {
 enum Role {
   STARTUP
   INVESTOR
+}
+
+model Session {
+  id          String    @id @default(uuid())
+  userId      String
+  userAgent   String?
+  ip          String?
+  createdAt   DateTime  @default(now())
+  expiresAt   DateTime
+  revokedAt   DateTime?
+  refreshHash String
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([expiresAt])
+}
+
+model UserToken {
+  id        String    @id @default(uuid())
+  userId    String
+  tokenHash String    @unique
+  type      TokenType
+  meta      Json?
+  expiresAt DateTime
+  usedAt    DateTime?
+  createdAt DateTime  @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([type])
+  @@index([expiresAt])
+}
+
+enum TokenType {
+  password_reset
+  email_verify
+  email_change
+  login_verify
 }
 
 model StartupProfile {

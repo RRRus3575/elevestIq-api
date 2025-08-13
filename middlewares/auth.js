@@ -1,30 +1,32 @@
-import HttpError from "../helpers/HttpError.js"
-import { verifyToken } from "../helpers/jwt.js";
-import { findUser } from "../services/authServices.js";
+import HttpError from "../helpers/HttpError.js";
+import { verifyAccessToken } from "../helpers/jwt.js";
+import { PrismaClient as P } from "@prisma/client";
+const prisma2 = new P();
 
+export default async function auth(req, _res, next) {
+  const authHeader = req.headers.authorization || "";
+  const [bearer, token] = authHeader.split(" ");
+  if (bearer !== "Bearer" || !token) return next(HttpError(401, "Not authorized"));
 
-const auth = async(req, res, next) =>{
-    const {authorization} = req.headers;
-    if(!authorization){
-        return next(HttpError(401, "Not authorized"));
-    }
+  const { payload, error } = verifyAccessToken(token);
+  if (error || !payload?.sub) return next(HttpError(401, "Not authorized"));
 
-    const [bearer, token] = authorization.split(" ");
-    if(bearer !== "Bearer"){
-        return next(HttpError(401, "Not authorized"));
-    }
+  const user = await prisma2.user.findUnique({ where: { id: String(payload.sub) } });
+  if (!user) return next(HttpError(401, "Not authorized"));
 
-    const {payload, error} = verifyToken(token)
-    if (error || !payload || !payload.email) {
-        return next(HttpError(401, "Not authorized"));
+  // Optional: tokenVersion hard kill
+  if ((user.tokenVersion ?? 0) !== Number(payload.tv ?? 0)) {
+    return next(HttpError(401, "Not authorized"));
+  }
+
+  // Optional strict: verify session by sid in payload
+  if (payload.sid) {
+    const session = await prisma2.session.findUnique({ where: { id: String(payload.sid) } });
+    if (!session || session.revokedAt || session.expiresAt <= new Date()) {
+      return next(HttpError(401, "Not authorized"));
     }
-    
-    const user = await findUser({email: payload.email})
-    if(!user || !user.token) {
-        return next(HttpError(401, "Not authorized"));
-    }
-    req.user = user;
-    next();
+  }
+
+  req.user = user;
+  next();
 }
-
-export default auth
