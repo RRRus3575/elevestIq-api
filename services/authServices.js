@@ -227,3 +227,73 @@ export const changePasswordUser = async (
 };
 
 
+export const requestEmailChange = async (userId, newEmail) => {
+  const email = String(newEmail || "").trim().toLowerCase();
+  if (!email) throw HttpError(400, "Bad request");
+
+  const user = await prisma.user.findUnique({
+    where: { id: userId },
+    select: { id: true, email: true, name: true },
+  });
+  if (!user) throw HttpError(404, "User not found");
+  if (user.email === email) throw HttpError(400, "Email is the same");
+
+  const exists = await prisma.user.findUnique({ where: { email } });
+  if (exists) throw HttpError(409, "Email already in use");
+
+  const { raw, expiresAt } = await createUserToken(
+    user.id,
+    TokenType.email_change,
+    { newEmail: email }, 
+    60
+  );
+
+  await sendActionEmail({
+    type: "email_change",
+    to: email,
+    name: user.name,
+    token: raw,
+    expiresAt,
+  });
+
+  return { message: "Confirmation link sent to new email" };
+};
+
+export const confirmEmailChange = async (rawToken, { keepSessionId = null } = {}) => {
+  const tok = await consumeUserToken(rawToken, TokenType.email_change);
+
+  const newEmail = tok?.meta?.newEmail
+    ? String(tok.meta.newEmail).trim().toLowerCase()
+    : null;
+  if (!newEmail) throw HttpError(400, "Invalid token payload");
+
+  const conflict = await prisma.user.findUnique({ where: { email: newEmail } });
+  if (conflict && conflict.id !== tok.userId) {
+    throw HttpError(409, "Email already in use");
+  }
+
+  await prisma.$transaction(async (tx) => {
+    await tx.user.update({
+      where: { id: tok.userId },
+      data: {
+        email: newEmail,
+        isVerified: true,           
+        tokenVersion: { increment: 1 },
+      },
+    });
+
+    if (keepSessionId) {
+      await tx.session.updateMany({
+        where: { userId: tok.userId, id: { not: keepSessionId }, revokedAt: null },
+        data: { revokedAt: new Date() },
+      });
+    } else {
+      await tx.session.updateMany({
+        where: { userId: tok.userId, revokedAt: null },
+        data: { revokedAt: new Date() },
+      });
+    }
+  });
+
+  return { message: "Email updated" };
+};

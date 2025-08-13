@@ -9,7 +9,9 @@ import {
   findUserById, 
   requestPasswordReset, 
   resetPasswordByToken, 
-  changePasswordUser  
+  changePasswordUser,
+  requestEmailChange, 
+  confirmEmailChange  
 } from "../services/authServices.js";
 import { generateAccessToken, ACCESS_TTL, SESSION_MAX_DAYS } from '../helpers/jwt.js';
 import { createSession, rotateSession, findValidSessionByRawRefresh, revokeSession } from "../services/sessionService.js";
@@ -116,6 +118,19 @@ const changePassword = async (req, res) => {
   res.json(result)
 } 
 
+const requestChangeEmail = async (req, res) => {
+  const { newEmail } = req.body;
+  const result = await requestEmailChange(req.user.id, newEmail);
+  res.json(result);
+};
+
+
+const confirmChangeEmail = async (req, res) => {
+  const { token } = req.params;
+  const result = await confirmEmailChange(token);
+  res.json(result);
+};
+
 export default {
   registerController: controllerWrapper(registerController),
   loginController: controllerWrapper(loginController),
@@ -127,4 +142,6 @@ export default {
   forgotPassword: controllerWrapper(forgotPassword),
   applyNewPassword: controllerWrapper(applyNewPassword),
   changePassword: controllerWrapper(changePassword),
+  requestChangeEmail: controllerWrapper(requestChangeEmail),
+  confirmChangeEmail: controllerWrapper(confirmChangeEmail),
 };

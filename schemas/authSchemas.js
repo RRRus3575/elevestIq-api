@@ -32,3 +32,6 @@ export const changePasswordSchema = Joi.object({
     .required(),
 });
 
+export const requestEmailChangeSchema = Joi.object({
+  newEmail: Joi.string().pattern(emailRegex).required(),
+});
