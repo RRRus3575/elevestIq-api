@@ -45,8 +45,8 @@ const buildLink = (type, token) => {
   switch (type) {
     case "email_verify":   return `${FRONTEND_URL}/verify/${t}`;
     case "password_reset": return `${FRONTEND_URL}/resetPassword/${t}`;
-    case "email_change":   return `${FRONTEND_URL}/confirm-email-change/${t}`;
-    case "login_verify":   return `${FRONTEND_URL}/login-verify/${t}`;
+    case "email_change":   return `${FRONTEND_URL}/confirmEmailChange/${t}`;
+    case "login_verify":   return `${FRONTEND_URL}/loginVerify/${t}`;
     default:               return `${FRONTEND_URL}/action/${t}`;
   }
 };

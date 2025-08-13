@@ -5,7 +5,8 @@ import {
     authLoginSchema, 
     requestPasswordResetSchema, 
     resetPasswordSchema, 
-    changePasswordSchema 
+    changePasswordSchema,
+    requestEmailChangeSchema,
 } from "../schemas/authSchemas.js";
 import authController from "../controllers/authController.js";
 import auth from "../middlewares/auth.js";
@@ -19,7 +20,9 @@ const {
     resendVerification,
     forgotPassword,
     applyNewPassword,
-    changePassword
+    changePassword,
+    requestChangeEmail,
+    confirmChangeEmail
 } = authController
 
 const authRouter = express.Router();
@@ -42,5 +45,8 @@ authRouter.post("/resetPassword",validateBody(resetPasswordSchema), applyNewPass
 
 authRouter.post("/changePassword", auth, validateBody(changePasswordSchema), changePassword)
 
+authRouter.post("/requestEmailChange", auth, validateBody(requestEmailChangeSchema), requestChangeEmail);
+
+authRouter.get("/confirmEmailChange/:token", confirmChangeEmail);
 
 export default authRouter
