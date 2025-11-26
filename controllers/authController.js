@@ -18,12 +18,12 @@ import { createSession, rotateSession, findValidSessionByRawRefresh, revokeSessi
 
 function setRefreshCookie(res, raw) {
   const secure = process.env.COOKIE_SECURE === "true" || process.env.NODE_ENV === "production";
-  const maxDays = Number(process.env.SESSION_MAX_DAYS ?? 90);   // ← читаем из env тут
+  const maxDays = Number(process.env.SESSION_MAX_DAYS ?? 90);   
   res.cookie("refresh", raw, {
     httpOnly: true,
     secure,
     sameSite: "lax",
-    path: "/auth",
+    path: "/api/auth",
     maxAge: 1000 * 60 * 60 * 24 * maxDays,
   });
 }

@@ -1,7 +1,6 @@
 import HttpError from "../helpers/HttpError.js";
 import { verifyAccessToken } from "../helpers/jwt.js";
-import { PrismaClient as P } from "@prisma/client";
-const prisma2 = new P();
+import {prisma} from "../helpers/db.js"
 
 export default async function auth(req, _res, next) {
   const authHeader = req.headers.authorization || "";
@@ -11,7 +10,7 @@ export default async function auth(req, _res, next) {
   const { payload, error } = verifyAccessToken(token);
   if (error || !payload?.sub) return next(HttpError(401, "Not authorized"));
 
-  const user = await prisma2.user.findUnique({ where: { id: String(payload.sub) } });
+  const user = await prisma.user.findUnique({ where: { id: String(payload.sub) } });
   if (!user) return next(HttpError(401, "Not authorized"));
 
   // Optional: tokenVersion hard kill
@@ -21,7 +20,7 @@ export default async function auth(req, _res, next) {
 
   // Optional strict: verify session by sid in payload
   if (payload.sid) {
-    const session = await prisma2.session.findUnique({ where: { id: String(payload.sid) } });
+    const session = await prisma.session.findUnique({ where: { id: String(payload.sid) } });
     if (!session || session.revokedAt || session.expiresAt <= new Date()) {
       return next(HttpError(401, "Not authorized"));
     }

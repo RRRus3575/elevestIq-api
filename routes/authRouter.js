@@ -22,10 +22,13 @@ const {
     applyNewPassword,
     changePassword,
     requestChangeEmail,
-    confirmChangeEmail
+    confirmChangeEmail,
+    refreshController,
 } = authController
 
 const authRouter = express.Router();
+
+authRouter.post("/refresh", refreshController);
 
 authRouter.post("/register", validateBody(authRegisterSchema), registerController)
 

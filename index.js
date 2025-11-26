@@ -1,13 +1,16 @@
 import express from 'express';
 import authRouter from './routes/authRouter.js';
+import cookieParser from "cookie-parser";
 import dotenv from 'dotenv';
 dotenv.config();
 
 
 const app = express();
 app.use(express.json());
+app.use(cookieParser());
 
 app.use("/api/auth", authRouter)
+
 
 app.use((_, res) => {
   res.status(404).json({ message: "Route not found" });
@@ -22,5 +25,5 @@ const {PORT = 5000} = process.env
 const port = Number(PORT)
 
 app.listen(port, () => {
-  console.log(`Сервер работает: http://localhost:${port}`);
+  console.log(`Server is working: http://localhost:${port}`);
 });
