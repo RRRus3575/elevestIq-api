@@ -1,11 +1,12 @@
 import bcrypt from "bcrypt";
 import crypto from "crypto";
 import HttpError from "../helpers/HttpError.js";
-import { PrismaClient, TokenType } from "@prisma/client";
+import { TokenType } from "@prisma/client";
+import {prisma} from "../helpers/db.js"
 import { sendActionEmail } from "../helpers/sendActionEmail.js";
 import { revokeAllUserSessions } from "./sessionService.js";
 
-const prisma = new PrismaClient();
+
 
 
 const genRawToken = (bytes = 32) => crypto.randomBytes(bytes).toString("hex");

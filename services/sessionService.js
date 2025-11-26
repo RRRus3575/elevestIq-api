@@ -1,8 +1,7 @@
-import { PrismaClient } from "@prisma/client";
+import {prisma} from "../helpers/db.js"
 import { generateRefreshTokenRaw, hashRefreshToken } from "../helpers/jwt.js";
 import { SESSION_MAX_DAYS } from "../helpers/jwt.js";
 
-const prisma = new PrismaClient();
 
 export async function createSession(userId, { ip, userAgent }) {
   const raw = generateRefreshTokenRaw();
