@@ -21,13 +21,13 @@ export const requestPasswordResetSchema = Joi.object({
 
 export const resetPasswordSchema = Joi.object({
   token: Joi.string().required(),         
-  newPassword: Joi.string().min(8).required(), 
+  newPassword: Joi.string().min(6).required(), 
 });
 
 export const changePasswordSchema = Joi.object({
   currentPassword: Joi.string().required(),
   newPassword: Joi.string()
-    .min(8)
+    .min(6)
     .invalid(Joi.ref("currentPassword")) 
     .required(),
 });
