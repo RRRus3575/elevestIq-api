@@ -55,7 +55,7 @@ export const registerUser = async (data) => {
       password,
       isVerified: false,
     },
-    select: { id: true, email: true, name: true, role: true, isVerified: true },
+    select: { id: true, email: true, name: true, role: false, isVerified: true },
   });
 
   const { raw, expiresAt } = await createUserToken(user.id, TokenType.email_verify, null, 60);
