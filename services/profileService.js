@@ -24,7 +24,7 @@ export const createStartupProfile = async (userId, data) => {
       companyName: data.companyName || null,
       description: data.description || null,
       goals: data.goals || null,
-      tags: data.tags || [],
+      tags: data.tags ?? [],
       industry: data.industry || null,
       stage: data.stage || null,
       location: data.location || null,
@@ -41,7 +41,22 @@ export const createStartupProfile = async (userId, data) => {
     },
   });
 
-  return profile;
+  return {
+    userId: profile.user.id,
+    email: profile.user.email,
+    name: profile.user.name,
+    role: profile.user.role,
+    profile: {
+      id: profile.id,
+      companyName: profile.companyName,
+      description: profile.description,
+      goals: profile.goals,
+      tags: profile.tags,
+      industry: profile.industry,
+      stage: profile.stage,
+      location: profile.location,
+    },
+  };
 };
 
 export const updateStartupProfile = async (userId, data) => {
@@ -82,7 +97,22 @@ export const updateStartupProfile = async (userId, data) => {
     },
   });
 
-  return profile;
+  return {
+    userId: profile.user.id,
+    email: profile.user.email,
+    name: profile.user.name,
+    role: profile.user.role,
+    profile: {
+      id: profile.id,
+      companyName: profile.companyName,
+      description: profile.description,
+      goals: profile.goals,
+      tags: profile.tags,
+      industry: profile.industry,
+      stage: profile.stage,
+      location: profile.location,
+    },
+  };
 };
 
 export const createInvestorProfile = async (userId, data) => {
@@ -112,7 +142,7 @@ export const createInvestorProfile = async (userId, data) => {
       companyName: data.companyName || null,
       description: data.description || null,
       interests: data.interests || null,
-      tags: data.tags || [],
+      tags: data.tags ?? [],
       region: data.region || null,
       budgetMin: data.budgetMin !== undefined ? data.budgetMin : null,
       budgetMax: data.budgetMax !== undefined ? data.budgetMax : null,
@@ -129,7 +159,22 @@ export const createInvestorProfile = async (userId, data) => {
     },
   });
 
-  return profile;
+  return {
+    userId: profile.user.id,
+    email: profile.user.email,
+    name: profile.user.name,
+    role: profile.user.role,
+    profile: {
+      id: profile.id,
+      companyName: profile.companyName,
+      description: profile.description,
+      interests: profile.interests,
+      tags: profile.tags,
+      region: profile.region,
+      budgetMin: profile.budgetMin,
+      budgetMax: profile.budgetMax,
+    },
+  };
 };
 
 export const updateInvestorProfile = async (userId, data) => {
@@ -177,7 +222,22 @@ export const updateInvestorProfile = async (userId, data) => {
     },
   });
 
-  return profile;
+  return {
+    userId: profile.user.id,
+    email: profile.user.email,
+    name: profile.user.name,
+    role: profile.user.role,
+    profile: {
+      id: profile.id,
+      companyName: profile.companyName,
+      description: profile.description,
+      interests: profile.interests,
+      tags: profile.tags,
+      region: profile.region,
+      budgetMin: profile.budgetMin,
+      budgetMax: profile.budgetMax,
+    },
+  };
 };
 
 export const deleteStartupProfile = async (userId) => {

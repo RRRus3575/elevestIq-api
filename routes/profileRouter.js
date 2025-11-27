@@ -69,11 +69,7 @@ profileRouter.delete(
   deleteInvestorProfileController
 );
 
-profileRouter.get(
-  "/me",
-  auth,
-  getMyProfileController
-);
+profileRouter.get("/me", auth, getMyProfileController);
 
 profileRouter.put(
   "/me",
@@ -82,6 +78,6 @@ profileRouter.put(
   updateMyProfileController
 );
 
-profileRouter.get("/:userId", getProfileController);
+profileRouter.get("/:userId", auth, getProfileController);
 
 export default profileRouter;
