@@ -26,6 +26,7 @@ app.use(helmet());
 // CORS
 const allowedOrigins = [
   "https://idiomoland.com",       // прод
+  "https://www.idiomoland.com",   // если есть www
 ].filter(Boolean);
 
 app.use(cors({
