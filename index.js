@@ -18,7 +18,7 @@ const app = express();
 // Если ты на Railway / Render за прокси
 app.set("trust proxy", 1);
 
-// --- SECURITY MIDDLEWARES ---
+// --- SECURITY MIDDLEWARES ----
 
 // Безопасные заголовки
 app.use(helmet());
