@@ -51,11 +51,11 @@ export const registerUser = async (data) => {
   const user = await prisma.user.create({
     data: {
       email,
-      ...data, 
       password,
+      name: data.name ?? null,
       isVerified: false,
     },
-    select: { id: true, email: true, name: true, role: false, isVerified: true },
+    select: { id: true, email: true, name: true, isVerified: true },
   });
 
   const { raw, expiresAt } = await createUserToken(user.id, TokenType.email_verify, null, 60);
@@ -69,6 +69,7 @@ export const registerUser = async (data) => {
 
   return user;
 };
+
 
 export const loginUser = async ({ email, password }) => {
   const user = await prisma.user.findUnique({
@@ -298,3 +299,49 @@ export const confirmEmailChange = async (rawToken, { keepSessionId = null } = {}
 
   return { message: "Email updated" };
 };
+
+
+export async function socialLogin({ provider, providerId, email, emailVerified, profile }) {
+  let oauth = await prisma.oAuthAccount.findUnique({
+    where: {
+      provider_providerId: {
+        provider,     
+        providerId,   
+      },
+    },
+    include: { user: true },
+  });
+
+  if (oauth && oauth.user) {
+    return oauth.user;
+  }
+
+  let user = email
+    ? await prisma.user.findUnique({ where: { email } })
+    : null;
+
+  if (!user && email) {
+    user = await prisma.user.create({
+      data: {
+        email,
+        name: profile && profile.name ? profile.name : null,
+        isVerified: !!emailVerified,
+      },
+    });
+  }
+
+  if (!user) {
+    throw new Error('Cannot create account without email');
+  }
+
+  await prisma.oAuthAccount.create({
+    data: {
+      provider,          
+      providerId,
+      email: email || null,
+      userId: user.id,
+    },
+  });
+
+  return user;
+}

@@ -24,6 +24,7 @@ const {
     requestChangeEmail,
     confirmChangeEmail,
     refreshController,
+    googleLogin,
 } = authController
 
 const authRouter = express.Router();
@@ -51,5 +52,8 @@ authRouter.post("/changePassword", auth, validateBody(changePasswordSchema), cha
 authRouter.post("/requestEmailChange", auth, validateBody(requestEmailChangeSchema), requestChangeEmail);
 
 authRouter.get("/confirmEmailChange/:token", confirmChangeEmail);
+
+authRouter.post("/goggle", googleLogin)
+
 
 export default authRouter

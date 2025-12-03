@@ -1,5 +1,6 @@
 import HttpError from "../helpers/HttpError.js";
 import controllerWrapper from "../controllers/controllerWrapper.js";
+import { verifyGoogleIdToken } from './googleClient.js'; 
 import { 
   registerUser, 
   loginUser, 
@@ -11,9 +12,10 @@ import {
   resetPasswordByToken, 
   changePasswordUser,
   requestEmailChange, 
-  confirmEmailChange  
+  confirmEmailChange,
+  socialLogin
 } from "../services/authServices.js";
-import { generateAccessToken, ACCESS_TTL, SESSION_MAX_DAYS } from '../helpers/jwt.js';
+import { generateAccessToken, ACCESS_TTL } from '../helpers/jwt.js';
 import { createSession, rotateSession, findValidSessionByRawRefresh, revokeSession } from "../services/sessionService.js";
 
 function setRefreshCookie(res, raw) {
@@ -69,7 +71,7 @@ const logoutController = async (req, res) => {
     if (session) await revokeSession(session.id);
   }
   await logoutUser(req.user.id); 
-  res.clearCookie("refresh", { path: "/auth" });
+  res.clearCookie("refresh", { path: "/api/auth" });
   res.status(204).send();
 };
 
@@ -131,6 +133,43 @@ const confirmChangeEmail = async (req, res) => {
   res.json(result);
 };
 
+const googleLogin = async (req, res) => {
+  const { idToken } = req.body;
+  if (!idToken) {
+    throw HttpError(400, "idToken is required");
+  }
+
+  const googlePayload = await verifyGoogleIdToken(idToken);
+
+  const user = await socialLogin({
+    provider: 'GOOGLE',
+    providerId: googlePayload.sub,
+    email: googlePayload.email,
+    emailVerified: googlePayload.email_verified,
+    profile: { name: googlePayload.name },
+  });
+
+  const { session, rawRefresh } = await createSession(user.id, {
+    ip: req.ip,
+    userAgent: req.get("user-agent"),
+  });
+  setRefreshCookie(res, rawRefresh);
+
+  const access = generateAccessToken({
+    userId: user.id,
+    role: user.role,
+    tokenVersion: user.tokenVersion ?? 0,
+    sid: session.id,
+  });
+
+  res.json({
+    access,
+    accessTtl: ACCESS_TTL,
+    user: { id: user.id, email: user.email, role: user.role },
+  });
+};
+
+
 export default {
   registerController: controllerWrapper(registerController),
   loginController: controllerWrapper(loginController),
@@ -144,4 +183,5 @@ export default {
   changePassword: controllerWrapper(changePassword),
   requestChangeEmail: controllerWrapper(requestChangeEmail),
   confirmChangeEmail: controllerWrapper(confirmChangeEmail),
+  googleLogin: controllerWrapper(googleLogin),
 };
