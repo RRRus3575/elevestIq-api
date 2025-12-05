@@ -1,0 +1,20 @@
+[33ma0fc136[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mmain[m[33m, [m[1;31morigin/main[m[33m, [m[1;31morigin/HEAD[m[33m)[m Merge pull request #9 from RRRus3575/auth
+[33m35a8866[m[33m ([m[1;31morigin/auth[m[33m, [m[1;32mfix[m[33m, [m[1;32mauth[m[33m)[m fix
+[33m682d269[m Merge pull request #8 from RRRus3575/auth
+[33m6f5afa9[m fix
+[33me42c17a[m 1
+[33m4c27506[m 1
+[33m55c9970[m Merge pull request #5 from RRRus3575/feature/profiles
+[33m7abb1d3[m[33m ([m[1;31morigin/feature/profiles[m[33m)[m Comments have been taken into account.
+[33m1e6360d[m create investor/startup/me endpoints crud functionality
+[33mff8dafb[m Merge pull request #7 from RRRus3575/auth
+[33m34daa2c[m role
+[33ma3bcd14[m 1
+[33m99e5955[m Merge pull request #6 from RRRus3575/auth
+[33m3780f13[m remind errors
+[33m0c70ede[m Merge pull request #4 from RRRus3575/auth
+[33m735a8f1[m change email
+[33m23350de[m Merge pull request #3 from RRRus3575/auth
+[33ma5bdb78[m update info in readme about schema
+[33m2a3d650[m refresh token in auth and schemas, reset password, change password
+[33md54fbbf[m Merge pull request #2 from RRRus3575/auth
